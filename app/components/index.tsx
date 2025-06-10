@@ -22,6 +22,8 @@ import AppUnavailable from '@/app/components/app-unavailable'
 import { API_KEY, APP_ID, APP_INFO, isShowPrompt, promptTemplate } from '@/config'
 import type { Annotation as AnnotationType } from '@/types/log'
 import { addFileInfos, sortAgentSorts } from '@/utils/tools'
+import { useUser } from '@auth0/nextjs-auth0/client'
+import { useRouter } from 'next/navigation'
 
 export type IMainProps = {
   params: any
@@ -32,6 +34,8 @@ const Main: FC<IMainProps> = () => {
   const media = useBreakpoints()
   const isMobile = media === MediaType.mobile
   const hasSetAppConfig = APP_ID && API_KEY
+  const { user, isLoading } = useUser()
+  const router = useRouter()
 
   /*
   * app info
@@ -646,6 +650,16 @@ const Main: FC<IMainProps> = () => {
         copyRight={APP_INFO.copyright || APP_INFO.title}
       />
     )
+  }
+
+  React.useEffect(() => {
+    if (!isLoading && !user) {
+      router.replace('/login')
+    }
+  }, [user, isLoading, router])
+
+  if (isLoading || !user) {
+    return null // or a loading spinner
   }
 
   if (appUnavailable)
